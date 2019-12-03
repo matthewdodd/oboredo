@@ -17,19 +17,36 @@ git clone https://github.com/matthewdodd/oboredo.git
 ```sql
 CREATE DATABASE oboredo CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
-CREATE TABLE oboredo.raw_div0(type varchar(60), id varchar(60));
+CREATE TABLE oboredo.raw_div0(type varchar(60) COMMENT 'source of documents'
+                             ,id varchar(60) COMMENT 'unique source identifier')
+COMMENT 'single file unique document identification table';
 
-CREATE TABLE oboredo.raw_div1(type varchar(60), id varchar(60));
+CREATE TABLE oboredo.raw_div1(type varchar(60) COMMENT 'source of documents'
+                             ,id varchar(60) COMMENT 'unique source identifier')
+COMMENT 'single case, sessionPaper, ordinaryAccount unique document identification table';
 
-CREATE TABLE oboredo.raw_interp(inst varchar(60), type varchar(60), value varchar(4000));
+CREATE TABLE oboredo.raw_interp(inst varchar(60) COMMENT 'unique interp identifier; shared with raw_div1.id'
+                               ,type varchar(60) COMMENT 'kind of interp record'
+                               ,value varchar(4000) COMMENT 'description of the type of interp record')
+COMMENT 'primary table for base information of div1';
 
-CREATE TABLE oboredo.raw_xptr(type varchar(60), doc varchar(60));
+CREATE TABLE oboredo.raw_xptr(type varchar(60) COMMENT 'kind of external document'
+                             ,doc varchar(60) COMMENT 'unique external document referential identifier')
+COMMENT 'external pointers for documents contained with OBO';
 
-CREATE TABLE oboredo.raw_join(result varchar(60), id varchar(60), targOrder varchar(1), targets varchar(4000));
+CREATE TABLE oboredo.raw_join(result varchar(60) COMMENT 'kind of connection between targets'
+                             ,id varchar(60) COMMENT 'unique join identifier'
+                             ,targOrder varchar(1) COMMENT 'if targets are ordered; Y/N'
+                             ,targets varchar(4000) COMMENT 'connected raw_interp.inst; latter id is result of former id')
+COMMENT 'joining referential ids across all other tables';
 
-CREATE TABLE oboredo.raw_persName(id varchar(60), type varchar(60));
+CREATE TABLE oboredo.raw_persName(id varchar(60) COMMENT 'unique persName identifier'
+                                 ,type varchar(60) COMMENT 'kind of person being referenced')
+COMMENT 'all individuals and their type';
 
-CREATE TABLE oboredo.raw_rs(id varchar(60), type varchar(60));
+CREATE TABLE oboredo.raw_rs(id varchar(60) COMMENT 'unique rs identifiers'
+                           ,type varchar(60) COMMENT 'label applied to the id')
+COMMENT 'referencing strings';
 ```
 
 ## Contributing

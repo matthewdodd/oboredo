@@ -17,7 +17,7 @@ Basic command is:
         [SET col_name={expr | DEFAULT},
             [, col_name={expr | DEFAULT}] ...]
 
-There is no need (ostensibly) from the SET command because the columns are named identically to the fields within the XML tags.
+There is no need (ostensibly) for the SET command because the columns are named identically to the fields within the XML tags.
 */
 
 LOAD XML LOCAL INFILE './OBO_XML_72/sessionsPapers/16740429.xml'

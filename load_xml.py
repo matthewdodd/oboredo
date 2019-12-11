@@ -1,10 +1,12 @@
+import xml.etree.ElementTree as ET
 import mysql.connector
 import os
 
-rows = ['div0','div1','interp','join','persName','rs','xptr']
 sesdir = os.fsencode('./OBO_XML_72/sessionsPapers')
-oadir = os.fsencode('./OBO_XML_72/ordinarysAccounts')
+#oadir = os.fsencode('./OBO_XML_72/ordinarysAccounts')
+#rows = ['div0','div1','interp','join','persName','rs','xptr']
 
+"""
 try:
   cnx = mysql.connector.connect(host="localhost",
                                 database='employees',
@@ -21,14 +23,15 @@ else:
   cnx.close()
 
 cursor = cnx.cursor()
+"""
 
 for filename in os.listdir(sesdir):
     if filename.endswith(".xml"): 
-        for x in rows:
-          sql = str("LOAD XML LOCAL INFILE '",filename,"' INTO TABLE oboreda.",x," ROWS IDENTIFIED BY '<",x,">'")
-          print(sql)
-          #cursor.execute(sql)
-          #cnx.commit()
+        tree = ET.parse(filename)
+        root = tree.getroot()
+
+        for rec in root.iter('div0'):
+            print(rec.attrib)
         continue
     else:
         continue

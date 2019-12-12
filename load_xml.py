@@ -1,10 +1,14 @@
+#load_xml.py
+#tutorial where this began: https://www.datacamp.com/community/tutorials/python-xml-elementtree
+
 import xml.etree.ElementTree as ET
 import mysql.connector
 import os
 
-sesdir = os.fsencode('./OBO_XML_72/sessionsPapers')
-#oadir = os.fsencode('./OBO_XML_72/ordinarysAccounts')
+sesdir = os.fsencode('C:/projects/oboredo/OBO_XML_72/sessionsPapers')
+#oadir = os.fsencode('C:/projects/oboredo/OBO_XML_72/ordinarysAccounts')
 #rows = ['div0','div1','interp','join','persName','rs','xptr']
+elements = []
 
 #try:
 #  cnx = mysql.connector.connect(host="localhost",
@@ -24,14 +28,18 @@ sesdir = os.fsencode('./OBO_XML_72/sessionsPapers')
 #cursor = cnx.cursor()
 
 for filename in os.listdir(sesdir):
-    if filename.endswith(".xml"): 
-        tree = ET.parse(filename)
-        root = tree.getroot()
-
-        for rec in root.iter('div0'):
-            print(rec.attrib)
-        continue
-    else:
-        continue
+  if filename.endswith(".xml"):
+    print("The XML file name is:",str(filename))
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    for elem in root.iter():
+      elements.append(elem.tag)
+    elements = list(dict.fromkeys(elements))
+    print(elements)
+    for rec in root.iter('div0'):
+      print("div0 attribute is",str(rec.attrib))
+    continue
+  else:
+    continue
 
 #cnx.close

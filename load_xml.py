@@ -34,13 +34,20 @@ for xml_file in glob.glob(os.path.join(parent_dir, '*.xml')):
     print("div0 attribute is",str(rec.attrib))
     div0_sql = "insert into oboredo.raw_div0(type, id) values (%s, %s)"
     div0_val = (str(rec.attrib.get("type")), str(rec.attrib.get("id")))
-    #print (rec.attrib.get("type"))
     cursor.execute(div0_sql, div0_val)
     cnx.commit()
-  #for rec in root.iter('div1'):
-  #  print("div1 attribute is",str(rec.attrib))
-  #for rec in root.iter('interp'):
-  #  print("interp attribute is",str(rec.attrib))
+  for rec in root.iter('div1'):
+    print("div1 attribute is",str(rec.attrib))
+    div1_sql = "insert into oboredo.raw_div1(type, id) values (%s, %s)"
+    div1_val = (str(rec.attrib.get("type")), str(rec.attrib.get("id")))
+    cursor.execute(div1_sql, div1_val)
+    cnx.commit()
+  for rec in root.iter('interp'):
+    print("interp attribute is",str(rec.attrib))
+    interp_sql = "insert into oboredo.raw_interp(inst, type, value) values (%s, %s, %s)"
+    interp_val = (str(rec.attrib.get("inst")), str(rec.attrib.get("type")), str(rec.attrib.get("value")))
+    cursor.execute(div1_sql, div1_val)
+    cnx.commit()
   #for rec in root.iter('xptr'):
   #  print("xptr attribute is",str(rec.attrib))
   #for rec in root.iter('join'):

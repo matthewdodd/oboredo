@@ -48,6 +48,10 @@ CREATE TABLE oboredo.raw_rs(id varchar(60) COMMENT 'unique rs identifiers'
                            ,type varchar(60) COMMENT 'label applied to the id')
 COMMENT 'referencing strings';
 ```
+3. You will need to install the  MySQL connector Python module to make this all work:
+```bash
+pip install mysql-connector-python-rf
+```
 
 ## Contributing
 Pull requests are acceptable. It is presumed, however, that you will be forking this repository to validate any work I have performed. Should you wish to contribute to this repository, you are welcome to.

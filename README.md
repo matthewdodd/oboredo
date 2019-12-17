@@ -3,9 +3,11 @@
 This is a reattempt to perform the data work from my Master's Thesis _The Empire of the Old Bailey Online: The Power of Zero_.
 
 ## Prerequisites
+You will need the following tools/software, with the versions being used in this project contained in parentheses:
 
-1. Git
-2. MySQL
+1. Git (2.16.2.windows.1)
+2. MySQL (8.0.18)
+3. Python (3.8.0)
 
 ## Getting Started
 
@@ -48,7 +50,12 @@ CREATE TABLE oboredo.raw_rs(id varchar(60) COMMENT 'unique rs identifiers'
                            ,type varchar(60) COMMENT 'label applied to the id')
 COMMENT 'referencing strings';
 ```
-3. You will need to install the  MySQL connector Python module to make this all work:
+3. When installing Python, if using Windows, make sure that teh location Python installs in is this:
+```bash
+C:\Python
+```
+
+4. You will need to install the  MySQL connector Python module to make this all work:
 ```bash
 pip install mysql-connector-python-rf
 ```

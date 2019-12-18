@@ -57,7 +57,7 @@ with files as xf:
     for rec in root.iter('persName'):
       persName.append(str(rec.attrib.get("id")), str(rec.attrib.get("type")))
     for rec in root.iter('rs'):
-      rs.append(val1, val2)str(rec.attrib.get("id")), str(rec.attrib.get("type")))
+      rs.append(str(rec.attrib.get("id")), str(rec.attrib.get("type")))
 
 try:
   cnx = mysql.connect(host="localhost",

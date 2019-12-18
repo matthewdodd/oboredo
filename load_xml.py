@@ -13,13 +13,12 @@ import mysql.connector as mysql
 import concurrent.futures
 import glob, os, datetime, logging
 
-logging.basicConfig(level=logging.DEBUG, filename='load_xml.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, filename='load_xml_b.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 a = datetime.datetime.now()
 logging.info('Start time is %s', a)
 
-dirs = ['C:/projects/oboredo/OBO_XML_72/sessionsPapers', 'C:/projects/oboredo/OBO_XML_72/ordinarysAccounts']
-tag = ['div0', 'div1', 'interp', 'xptr', 'join', 'persName', 'rs']
+#initialized lists
 files = []
 div0 = []
 div1 = []
@@ -29,6 +28,11 @@ join = []
 persName = []
 rs = []
 
+#defined lists
+dirs = ['C:/projects/oboredo/OBO_XML_72/sessionsPapers', 'C:/projects/oboredo/OBO_XML_72/ordinarysAccounts']
+tag = ['div0', 'div1', 'interp', 'xptr', 'join', 'persName', 'rs']
+
+#sql stmts
 div0_sql = "insert into oboredo.raw_div0(type, id) values (%s, %s)"
 div1_sql = "insert into oboredo.raw_div1(type, id) values (%s, %s)"
 interp_sql = "insert into oboredo.raw_interp(inst, type, value) values (%s, %s, %s)"
@@ -58,27 +62,20 @@ def gather_info(xf):
         rs.append(str(rec.attrib.get("id")), str(rec.attrib.get("type")))
 
 def run_sql(tags):
-    if (tags == 'div0'):
-        cursor.executemany(div0_sql, div0)
-    elif (tags == 'div1'):
-        cursor.executemany(div1_sql, div1)
-    elif (tags == 'interp'):
-        cursor.executemany(interp_sql, interp)
-    elif (tags == 'xptr'):
-        cursor.executemany(xptr_sql, xptr)
-    elif (tags == 'join'):
-        cursor.executemany(join_sql, join
-    elif (tags == 'persName'):
-        cursor.executemany(persName_sql, persName)
-    elif (tags == 'rs'):
-        cursor.executemany(rs_sql, rs)
+    sql = tags+"_sql"
+    cursor.executemany(sql, tags)
 
 for parent_dir in dirs:
     for xml_file in glob.glob(os.path.join(parent_dir, '*.xml')):
         files.append(xml_file)
 
+#multithreading
 with concurrent.futures.ThreadPoolExecutor() as executor:
     executor.map(gather_info, files)
+
+#multiprocessing
+#with concurrent.futures.ProcessPoolExecutor() as executor:
+#    executor.map(gather_info, files)
 
 try:
     cnx = mysql.connect(host="localhost",
@@ -94,8 +91,25 @@ cursor = cnx.cursor()
 cursor.execute('SET autocommit = 0')
 cnx.commit()
 
+#multithreading
 with concurrent.futures.ThreadPoolExecutor() as executor:
     executor.map(run_sql, tag)
+
+#multiprocessing
+#with concurrent.futures.ProcessPoolExecutor() as executor:
+#    executor.map(run_sql, tag)
+
+#if multithread/multiprocess for the executemany does not work, use this:
+#try:
+#    cursor.executemany(div0_sql, div0)
+#    cursor.executemany(div1_sql, div1)
+#    cursor.executemany(interp_sql, interp)
+#    cursor.executemany(xptr_sql, xptr)
+#    cursor.executemany(join_sql, join
+#    cursor.executemany(persName_sql, persName)
+#    cursor.executemany(rs_sql, rs)
+#except mysql.Error as err:
+#    logging.error(f'MySQL error raised: %s', err)
 
 cnx.commit
 cnx.close

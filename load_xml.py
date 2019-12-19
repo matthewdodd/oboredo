@@ -15,8 +15,8 @@ import glob, os, datetime, logging
 
 logging.basicConfig(level=logging.DEBUG, filename='load_xml_b.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
-a = datetime.datetime.now()
-logging.info('Start time is %s', a)
+start = datetime.datetime.now()
+logging.info(f'Start time is {start}')
 
 #initialized lists
 files = []
@@ -42,7 +42,7 @@ persName_sql = "insert into oboredo.raw_persName(id, type) values (%s, %s)"
 rs_sql = "insert into oboredo.raw_rs(id, type) values (%s, %s)"
 
 def gather_info(xf):
-    logging.info('XML file being interpreted is %s', xf)
+    logging.info(f'XML file being interpreted is {xf}')
     tree = ET.parse(xf)
     root = tree.getroot()
     for rec in root.iter('div0'):
@@ -85,7 +85,7 @@ try:
                         port="3306",
                         auth_plugin='mysql_native_password')
 except mysql.Error as err:
-    logging.error(f'MySQL error raised: %s', err)
+    logging.error(f'MySQL error raised: {err}')
 
 cursor = cnx.cursor()
 cursor.execute('SET autocommit = 0')
@@ -109,13 +109,13 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
 #    cursor.executemany(persName_sql, persName)
 #    cursor.executemany(rs_sql, rs)
 #except mysql.Error as err:
-#    logging.error(f'MySQL error raised: %s', err)
+#    logging.error(f'MySQL error raised: {err}')
 
 cnx.commit
 cnx.close
 logging.warning('cnx is now closed')
 
-b = datetime.datetime.now()
-logging.info('End time is %s', b)
-delta = b - a
-logging.info('Elapsed time is %s', delta)
+end = datetime.datetime.now()
+logging.info(f'End time is {end}')
+delta = end - start
+logging.info(f'Elapsed time is {delta}')

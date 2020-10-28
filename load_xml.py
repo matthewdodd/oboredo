@@ -2,18 +2,14 @@
 #tutorial where this began: https://www.datacamp.com/community/tutorials/python-xml-elementtree
 #change the passwd at line 68 to your chosen root passwd
 #the output file is called "load_xml.log" and can be tailed from a Terminal or Git Bash with the command 'tail -f load_xml.log'
-#run time is:
-#   started at          
-#   sessionsPapers ended at     
-#   ordinarysAccounts ended at  
-#   elapsed             
+#run time is approximately: 4 min 41 sec
 
 import xml.etree.ElementTree as ET
 import mysql.connector as mysql
 import concurrent.futures
 import glob, os, datetime, logging
 
-logging.basicConfig(level=logging.DEBUG, filename='load_xml_b.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, filename='load_xml.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 start = datetime.datetime.now()
 logging.info(f'Start time is {start}')
@@ -62,10 +58,6 @@ def gather_info(xf):
   for rec in root.iter('rs'):
     rs.append((str(rec.attrib.get("id")), str(rec.attrib.get("type"))))
 
-#def run_sql(tags):
-#  sql = tags+"_sql"
-#  cursor.executemany(sql, tags)
-
 for parent_dir in dirs:
   logging.info(f'got into dirs with {parent_dir}')
   for xml_file in glob.glob(os.path.join(parent_dir, '*.xml')):
@@ -76,17 +68,18 @@ for parent_dir in dirs:
 with concurrent.futures.ThreadPoolExecutor() as executor:
   executor.map(gather_info, files)
 
-#try:
-#  cnx = mysql.connect(host="localhost",
-#            database="oboredo",
-#            user="root",
-#            passwd="<>",
-#            port="3306",
-#            auth_plugin='mysql_native_password')
-#except mysql.Error as err:
-#  logging.error(f'MySQL error raised: {err}')
+try:
+  cnx = mysql.connect(host="localhost",
+            database="oboredo",
+            user="root",
+            passwd="<>",
+            port="3306",
+            auth_plugin='mysql_native_password',
+            autocommit=True)
+except mysql.Error as err:
+  logging.error(f'MySQL error raised: {err}')
 
-#cursor = cnx.cursor()
+cursor = cnx.cursor()
 #cursor.execute('SET autocommit = 0')
 #cnx.commit()
 
@@ -95,19 +88,29 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
 #  executor.map(run_sql, tag)
 
 #if multithread/multiprocess for the executemany does not work, use this:
-#try:
-#  cursor.executemany(div0_sql, div0)
-#  cursor.executemany(div1_sql, div1)
-#  cursor.executemany(interp_sql, interp)
-#  cursor.executemany(xptr_sql, xptr)
-#  cursor.executemany(join_sql, join)
-#  cursor.executemany(persName_sql, persName)
-#  cursor.executemany(rs_sql, rs)
-#except mysql.Error as err:
-#  logging.error(f'MySQL error raised: {err}')
+try:
+  cursor.executemany(div0_sql, div0)
+  cursor.executemany(div1_sql, div1)
+  cursor.executemany(interp_sql, interp)
+  cursor.executemany(xptr_sql, xptr)
+  cursor.executemany(join_sql, join)
+  cursor.executemany(persName_sql, persName)
+  cursor.executemany(rs_sql, rs)
+  cnx.commit
+except mysql.Error as err:
+  logging.error(f'MySQL error raised: {err}')
 
-#cnx.commit
-#cnx.close
+cnx.commit
+
+cursor.execute("SELECT * FROM oboredo.raw_div0")
+myresult = cursor.fetchall()
+for x in myresult:
+  print('div0 select:',x)
+
+print(cursor.rowcount, "record inserted.")
+
+cnx.commit
+cnx.close
 
 logging.info(f'div0 {len(div0)}')
 logging.info(f'div1 {len(div1)}')
@@ -122,4 +125,4 @@ logging.warning('cnx is now closed')
 end = datetime.datetime.now()
 logging.info(f'End time is {end}')
 delta = end - start
-logging.info(f'Elapsed time is {delta}')
+logging.info(f'Total Elapsed time is {delta}')

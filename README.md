@@ -53,6 +53,11 @@ COMMENT 'referencing strings';
 pip install mysql-connector-python-rf
 ```
 
+4. I updated the my.ini file to better handle the dta load from python into MySql. Note: this used well in excess of the 32GB of memory on the system and used up to 30GB of cache to handle the size of the executemany command. The modified file is saved to the repository and was pulled from here:
+```cmd
+C:\ProgramData\MySQL\MySQL Server 8.0\my.ini
+```
+
 ## Contributing
 Pull requests are acceptable. It is presumed, however, that you will be forking this repository to validate any work I have performed. Should you wish to contribute to this repository, you are welcome to.
 

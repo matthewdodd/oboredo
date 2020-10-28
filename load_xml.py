@@ -3,10 +3,10 @@
 #change the passwd at line 68 to your chosen root passwd
 #the output file is called "load_xml.log" and can be tailed from a Terminal or Git Bash with the command 'tail -f load_xml.log'
 #run time is:
-#     started at                    
-#     sessionsPapers ended at       
-#     ordinarysAccounts ended at    
-#     elapsed                       
+#   started at          
+#   sessionsPapers ended at     
+#   ordinarysAccounts ended at  
+#   elapsed             
 
 import xml.etree.ElementTree as ET
 import mysql.connector as mysql
@@ -29,9 +29,10 @@ persName = []
 rs = []
 
 #defined lists
-dirs = ['C:/projects/oboredo/OBO_XML_72/sessionsPapers', 'C:/projects/oboredo/OBO_XML_72/ordinarysAccounts']
+dirs = ['C:\\projects\\oboredo\\OBO_XML_72\\sessionsPapers\\', 'C:\\projects\\oboredo\\OBO_XML_72\\ordinarysAccounts\\']
+#dirs = ['C:\\projects\\oboredo\\temp\\']
 tag = ['div0', 'div1', 'interp', 'xptr', 'join', 'persName', 'rs']
-
+  
 #sql stmts
 div0_sql = "insert into oboredo.raw_div0(type, id) values (%s, %s)"
 div1_sql = "insert into oboredo.raw_div1(type, id) values (%s, %s)"
@@ -42,69 +43,80 @@ persName_sql = "insert into oboredo.raw_persName(id, type) values (%s, %s)"
 rs_sql = "insert into oboredo.raw_rs(id, type) values (%s, %s)"
 
 def gather_info(xf):
-    logging.info(f'XML file being interpreted is {xf}')
-    tree = ET.parse(xf)
-    root = tree.getroot()
-    for rec in root.iter('div0'):
-        div0.append(str(rec.attrib.get("type")), str(rec.attrib.get("id")))
-    for rec in root.iter('div1'):
-        div1.append(str(rec.attrib.get("type")), str(rec.attrib.get("id")))
-    for rec in root.iter('interp'):
-        interp.append(str(rec.attrib.get("inst")), str(rec.attrib.get("type")), str(rec.attrib.get("value")))
-    for rec in root.iter('xptr'):
-        xptr.append(str(rec.attrib.get("type")), str(rec.attrib.get("doc")))
-    #join is going to be different, some join xml tags don't have everything so we will input default values
-    for rec in root.iter('join'):
-        join.append(str(rec.attrib.get("result", "unknown")), str(rec.attrib.get("id", "unknown")), str(rec.attrib.get("targOrder", "M")), str(rec.attrib.get("targets", "unknown")))
-    for rec in root.iter('persName'):
-        persName.append(str(rec.attrib.get("id")), str(rec.attrib.get("type")))
-    for rec in root.iter('rs'):
-        rs.append(str(rec.attrib.get("id")), str(rec.attrib.get("type")))
+  logging.info(f'XML file being interpreted is {xf}')
+  tree = ET.parse(xf)
+  root = tree.getroot()
+  for rec in root.iter('div0'):
+    div0.append((str(rec.attrib.get("type")), str(rec.attrib.get("id"))))
+  for rec in root.iter('div1'):
+    div1.append((str(rec.attrib.get("type")), str(rec.attrib.get("id"))))
+  for rec in root.iter('interp'):
+    interp.append((str(rec.attrib.get("inst")), str(rec.attrib.get("type")), str(rec.attrib.get("value"))))
+  for rec in root.iter('xptr'):
+    xptr.append((str(rec.attrib.get("type")), str(rec.attrib.get("doc"))))
+  #join is going to be different, some join xml tags don't have everything so we will input default values
+  for rec in root.iter('join'):
+    join.append((str(rec.attrib.get("result", "unknown")), str(rec.attrib.get("id", "unknown")), str(rec.attrib.get("targOrder", "M")), str(rec.attrib.get("targets", "unknown"))))
+  for rec in root.iter('persName'):
+    persName.append((str(rec.attrib.get("id")), str(rec.attrib.get("type"))))
+  for rec in root.iter('rs'):
+    rs.append((str(rec.attrib.get("id")), str(rec.attrib.get("type"))))
 
-def run_sql(tags):
-    sql = tags+"_sql"
-    cursor.executemany(sql, tags)
+#def run_sql(tags):
+#  sql = tags+"_sql"
+#  cursor.executemany(sql, tags)
 
 for parent_dir in dirs:
-    for xml_file in glob.glob(os.path.join(parent_dir, '*.xml')):
-        files.append(xml_file)
+  logging.info(f'got into dirs with {parent_dir}')
+  for xml_file in glob.glob(os.path.join(parent_dir, '*.xml')):
+    logging.info(f'got into files with {xml_file}')
+    files.append(xml_file)
 
 #multithreading
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    executor.map(gather_info, files)
+  executor.map(gather_info, files)
 
-try:
-    cnx = mysql.connect(host="localhost",
-                        database="oboredo",
-                        user="root",
-                        passwd="<change this>",
-                        port="3306",
-                        auth_plugin='mysql_native_password')
-except mysql.Error as err:
-    logging.error(f'MySQL error raised: {err}')
+#try:
+#  cnx = mysql.connect(host="localhost",
+#            database="oboredo",
+#            user="root",
+#            passwd="<>",
+#            port="3306",
+#            auth_plugin='mysql_native_password')
+#except mysql.Error as err:
+#  logging.error(f'MySQL error raised: {err}')
 
-cursor = cnx.cursor()
-cursor.execute('SET autocommit = 0')
-cnx.commit()
+#cursor = cnx.cursor()
+#cursor.execute('SET autocommit = 0')
+#cnx.commit()
 
 #multithreading
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    executor.map(run_sql, tag)
+#with concurrent.futures.ThreadPoolExecutor() as executor:
+#  executor.map(run_sql, tag)
 
 #if multithread/multiprocess for the executemany does not work, use this:
-try:
-    cursor.executemany(div0_sql, div0)
-    cursor.executemany(div1_sql, div1)
-    cursor.executemany(interp_sql, interp)
-    cursor.executemany(xptr_sql, xptr)
-    cursor.executemany(join_sql, join
-    cursor.executemany(persName_sql, persName)
-    cursor.executemany(rs_sql, rs)
-except mysql.Error as err:
-    logging.error(f'MySQL error raised: {err}')
+#try:
+#  cursor.executemany(div0_sql, div0)
+#  cursor.executemany(div1_sql, div1)
+#  cursor.executemany(interp_sql, interp)
+#  cursor.executemany(xptr_sql, xptr)
+#  cursor.executemany(join_sql, join)
+#  cursor.executemany(persName_sql, persName)
+#  cursor.executemany(rs_sql, rs)
+#except mysql.Error as err:
+#  logging.error(f'MySQL error raised: {err}')
 
-cnx.commit
-cnx.close
+#cnx.commit
+#cnx.close
+
+logging.info(f'div0 {len(div0)}')
+logging.info(f'div1 {len(div1)}')
+logging.info(f'interp {len(interp)}')
+logging.info(f'xptr {len(xptr)}')
+logging.info(f'join {len(join)}')
+logging.info(f'persName {len(persName)}')
+logging.info(f'rs {len(rs)}')
+
 logging.warning('cnx is now closed')
 
 end = datetime.datetime.now()

@@ -2,23 +2,12 @@ import mysql.connector as mysql
 import concurrent.futures
 import glob, os, datetime, logging
 
-logging.basicConfig(level=logging.DEBUG, filename='map_data.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, filename='map_person_data.log', format='%(name)s - %(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 start = datetime.datetime.now()
 logging.info(f'Start time is {start}')
 
-#dbconfig
-try:
-  cnx = mysql.connect(host="localhost",
-            database="oboredo",
-            user="root",
-            passwd="<>",
-            port="3306",
-            auth_plugin='mysql_native_password',
-            autocommit=True)
-except mysql.Error as err:
-  logging.error(f'MySQL error raised: {err}')
-
+#sql stmts
 createPersonTable = "CREATE TABLE oboredo.person(id varchar(60) NOT NULL COMMENT 'unique person identifier' \
 						                        ,type varchar(60) COMMENT 'kind of person being referenced' \
                                                 ,gender varchar(60) COMMENT 'gender as determined by the courts' \
@@ -64,9 +53,20 @@ occPerson = "UPDATE oboredo.person pn \
                WHERE i.inst = pn.id \
                and i.type = 'occupation'"
 
+#dbconfig
+try:
+  cnx = mysql.connect(host="localhost",
+            database="oboredo",
+            user="root",
+            passwd="golf2000",
+            port="3306",
+            auth_plugin='mysql_native_password',
+            autocommit=True,
+            connection_timeout=86400)
+except mysql.Error as err:
+  logging.error(f'MySQL error raised: {err}')
+  
 cursor = cnx.cursor()
-cursor.execute('SET GLOBAL connect_timeout = 86400')
-cnx.commit()
 cursor.execute(createPersonTable)
 cnx.commit()
 logging.info(f'oboredo.person table has been created')

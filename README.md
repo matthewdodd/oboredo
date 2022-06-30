@@ -3,68 +3,58 @@
 This is a reattempt to perform the data work from my Master's Thesis _The Empire of the Old Bailey Online: The Power of Zero_.
 
 ## Prerequisites
-You will need the following tools/software, with the versions being used in this project contained in parentheses:
+You will need the following tools/software (versions used if important)
 
-1. Git (2.16.2.windows.1)
-2. MySQL (8.0.18)
-3. Python (3.8.0)
+1. Git (2.30.0.2)
+2. PostgreSQL (14.4 - v14 implements new split_part() function which allows negative indexing)
+3. Python (3.9.1)
 
 ## Getting Started
 
-1. You can either download all of the data yourself from the [University of Sheffield online repository](http://dx.doi.org/10.15131/shef.data.4775434) or you can run a git clone:
-```bash
-git clone https://github.com/matthewdodd/oboredo.git
+1. Download all of the data yourself from the [University of Sheffield online repository](http://dx.doi.org/10.15131/shef.data.4775434)
+    - I have copied the resulting file as listed below:
+
+```bat
+$ dir .
+ Volume in drive C has no label.
+ Volume Serial Number is 3AB7-6089
+
+ Directory of C:\Users\Matthew\projects\oboredo
+
+06/30/2022  05:18 PM    <DIR>          .
+02/07/2021  08:35 AM    <DIR>          ..
+02/07/2021  08:35 AM                 8 .gitignore
+12/29/2021  03:32 PM             4,505 load_xml.py
+02/07/2021  08:35 AM    <DIR>          ordinarysAccounts
+12/29/2021  03:32 PM    <DIR>          previous
+12/29/2021  05:52 PM             4,530 README.md
+02/07/2021  08:35 AM    <DIR>          sessionsPapers
+               3 File(s)          9,043 bytes
+               5 Dir(s)  555,840,692,224 bytes free
 ```
-2. You will also need to pre-create the MySQL database and tables to house the XML data:
+ 
+2. You will also need to pre-create the PostgreSQL database and tables to house the XML data:
+- I used the GUI when installing PostgreSQL 14.4 and the only thing I changed from the default was the port number: 5432 >> 5450.
+- For precreating everything in the database, these commands will suffice:
+    - These commands should be run as the 'postgres' superuser:
 ```sql
-CREATE DATABASE oboredo CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-
-CREATE TABLE oboredo.raw_div0(type varchar(60) COMMENT 'source of documents'
-                             ,id varchar(60) COMMENT 'unique source identifier')
-COMMENT 'single file unique document identification table';
-
-CREATE TABLE oboredo.raw_div1(type varchar(60) COMMENT 'source of documents'
-                             ,id varchar(60) COMMENT 'unique source identifier')
-COMMENT 'single case, sessionPaper, ordinaryAccount unique document identification table';
-
-CREATE TABLE oboredo.raw_interp(inst varchar(60) COMMENT 'unique interp identifier; shared with raw_div1.id'
-                               ,type varchar(60) COMMENT 'kind of interp record'
-                               ,value varchar(4000) COMMENT 'description of the type of interp record')
-COMMENT 'primary table for base information of div1';
-
-CREATE TABLE oboredo.raw_xptr(type varchar(60) COMMENT 'kind of external document'
-                             ,doc varchar(60) COMMENT 'unique external document referential identifier')
-COMMENT 'external pointers for documents contained with OBO';
-
-CREATE TABLE oboredo.raw_join(result varchar(60) COMMENT 'kind of connection between targets'
-                             ,id varchar(60) COMMENT 'unique join identifier'
-                             ,targOrder varchar(1) COMMENT 'if targets are ordered; Y/N'
-                             ,targets varchar(4000) COMMENT 'connected raw_interp.inst; latter id is result of former id')
-COMMENT 'joining referential ids across all other tables';
-
-CREATE TABLE oboredo.raw_persName(id varchar(60) COMMENT 'unique persName identifier'
-                                 ,type varchar(60) COMMENT 'kind of person being referenced')
-COMMENT 'all individuals and their type';
-
-CREATE TABLE oboredo.raw_rs(id varchar(60) COMMENT 'unique rs identifiers'
-                           ,type varchar(60) COMMENT 'label applied to the id')
-COMMENT 'referencing strings';
+CREATE ROLE DBA_TEST WITH PASSWORD 'golf2000';
+CREATE DATABASE DBA_TESTING OWNER DBA_TEST;
+ALTER ROLE DBA_TEST LOGIN;
+\l
 ```
-3. When installing Python, if using Windows, make sure that teh location Python installs in is this:
-```bash
-<<<<<<< Updated upstream
-C:\Python
-=======
-pip install wheel
-
-pip install mysql-connector-python-rf
->>>>>>> Stashed changes
+    - These commands should be run as the 'dba_test' user:
+```bat
+psql -p 5450 -U dba_test -d dba_testing
 ```
-
-4. You will need to install the  MySQL connector Python module to make this all work:
-```bash
-pip install mysql-connector-python-rf
+```sql
+CREATE TABLE RAW_DIV0 (ID TEXT, DIV0_TYPE TEXT);
+CREATE TABLE RAW_DIV1 (ID TEXT, DIV1_TYPE TEXT);
+CREATE TABLE RAW_INTERP (INST TEXT, INTERP_TYPE TEXT, VALUE TEXT);
+CREATE TABLE RAW_JOIN (RESULT TEXT, TARGETS TEXT);
+CREATE TABLE RAW_RS (INST TEXT, RS_TYPE TEXT, VALUE TEXT);
 ```
+3. Actually gathering the information from all of the *.xml files is tedious, but the fastest way I have found with python is in the [read_soup_processPool.py](./read_soup_processPool.py) file. Be careful though, this uses the `concurrent.futures.ProcessPoolExecutor()` functionality, which "default[s] to the number of processors on the machine [... But, o]n Windows, max_workers must be less than or equal to 61." This work is being performed on a computer that has an AMD Ryzen 9 5950X process, meaning that to Python it has 32 processors. I have manually increased this to use the axtual maximum of `max_workers=61`. This is a very CPU and memory intensive script, which can bog down a not as powerful computer or cause the script to crash.
 
 ## Contributing
 Pull requests are acceptable. It is presumed, however, that you will be forking this repository to validate any work I have performed. Should you wish to contribute to this repository, you are welcome to.

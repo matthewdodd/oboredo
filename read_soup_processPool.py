@@ -72,7 +72,7 @@ def main():
 
     #multithreading gather info
     logging.info(f'Beginning data extraction execution')
-    with concurrent.futures.ProcessPoolExecutor() as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=60) as executor:
         for r in executor.map(gather_info, files):
             main_list_div0.append(r[0])
             main_list_div1.append(r[1])

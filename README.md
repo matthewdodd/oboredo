@@ -54,8 +54,12 @@ CREATE TABLE RAW_INTERP (INST TEXT, INTERP_TYPE TEXT, VALUE TEXT);
 CREATE TABLE RAW_JOIN (RESULT TEXT, TARGETS TEXT);
 CREATE TABLE RAW_RS (INST TEXT, RS_TYPE TEXT, VALUE TEXT);
 ```
-3. Actually gathering the information from all of the *.xml files is tedious, but the fastest way I have found with python is in the [read_soup_processPool.py](./read_soup_processPool.py) file. Be careful though, this uses the `concurrent.futures.ProcessPoolExecutor()` functionality, which "default[s] to the number of processors on the machine [... But, o]n Windows, max_workers must be less than or equal to 61." This work is being performed on a computer that has an AMD Ryzen 9 5950X process, meaning that to Python it has 32 processors. I have manually increased this to use the axtual maximum of `max_workers=61`. This is a very CPU and memory intensive script, which can bog down a not as powerful computer or cause the script to crash.
-
+3. Actually gathering the information from all of the *.xml files is tedious, but the fastest way I have found with python is in the [read_soup_processPool.py](./read_soup_processPool.py) file. Be careful though, this uses the `concurrent.futures.ProcessPoolExecutor()` functionality, which "default[s] to the number of processors on the machine [... But, o]n Windows, max_workers must be less than or equal to 61." This work is being performed on a computer that has an AMD Ryzen 9 5950X process, meaning that to Python it has 32 processors. I have manually increased this to use the actual maximum of `max_workers=60`. This is a very CPU and memory intensive script, which can bog down a not as powerful computer or cause the script to crash.
+    - Prior to the run, the CPU was sitting between 2% and 4% utilization and RAM in use was at 7.8 GB
+    - At peak of run, CPU was sitting between 99% and 100% utilization and RAM in use was at 12 GB
+    - Checking the [log file](./logs/read_soup_processPool.log), we see the last line shows: `Total Elapsed time is 0:00:24.442000`
+    - This means we have used a significant amount of computational resources, but the time in this new run versus the old MA run is somewhere in the realm of 75 times faster, and is generally a more reliable and better method for handling this kind of data workload
+    
 ## Contributing
 Pull requests are acceptable. It is presumed, however, that you will be forking this repository to validate any work I have performed. Should you wish to contribute to this repository, you are welcome to.
 
